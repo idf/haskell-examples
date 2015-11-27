@@ -1,7 +1,8 @@
 {-
-List, varaible length, possible infinite length, homogenous type
+# List, varaible length, possible infinite length, homogenous type
 
-* Singleton list
+* Singleton list: [1] allowed
+* The syntax comes from the math set comprehension.
 -}
 -- | List Comprehension example with predicate
 listComprehension = [ 2*x | x <- [50..100], x `mod` 2 == 1]
@@ -22,10 +23,10 @@ xxs = [[1,3,5,2,3,1,2,4,5], [1,2,3,4,5,6,7,8,9], [1,2,4,2,1,6,3,1,3,2,3,6]]
 removeOddNestedLists xxs = [ [ x | x <- xs, even x ] | xs <- xxs]
 
 {-
-Tuple: fixed length, finite length, heterogenous type
+# Tuple: fixed length, finite length, heterogenous type
 
 * Tuples of different lengths/ heterogenous type will form different types
-* Non-singleton tuple
+* Non-singleton tuple: (1, ) not allowed
 * Tuples are types but they are dependent on their length as well as the types of thier components
 -}
 -- | longer list simply gets cut off to match the length of the shorter one.
