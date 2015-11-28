@@ -4,6 +4,7 @@ Functions
 
 {-
 Pattern Matching
+Pattern matching are not just for functions
 -}
 -- | factorial, recursive + pattern matching
 factorial :: (Integral a) => a -> a
@@ -45,7 +46,31 @@ initials :: String -> String -> String
 initials firstname lastname = [f] ++ ". " ++ [l] ++ "."
     where (f:_) = firstname
           (l:_) = lastname
+
 -- | "where" for shorthand local func notations, like mapper
 calcBmis :: (RealFloat a) => [(a, a)] -> [a]
 calcBmis xs = [bmi w h | (w, h) <- xs]
     where bmi weight height = weight/height^2
+
+{-
+Let
+-}
+-- | let <bindings> in <expression>
+letVar = let a = 100; b = 200; c = 300 in a*b*c
+letFunc = [let square x = x * x in (square 2, square 3, square 5)]
+-- | let for list comprehension
+calcBmis' :: (RealFloat a) => [(a, a)] -> [a]
+calcBmis' xs = [bmi w h | (w, h) <- xs, let bmi w h = w / h ^ 2]
+calcBmis'' xs = [bmi | (w, h) <- xs, let bmi = w / h ^ 2, bmi >= 25.0] -- without params
+
+{-
+Case
+case <expr> of <pat> -> <ret>
+               <pat> -> <ret>
+
+* Also uses pattern matching
+* Compared to function pattern matching, case can be used in anywhere
+-}
+head'' :: [a] -> a
+head'' xs = case xs of [] -> error "empty"
+                       (x:_) -> x
