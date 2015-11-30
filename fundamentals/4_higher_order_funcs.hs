@@ -1,10 +1,13 @@
 {-
-Higher order functions
+# Higher order functions
+
 Functions that takes func params or return func
 -}
 
 {-
-Currying: Every function in Haskell officially only takes one parameter.
+# Currying
+
+Every function in Haskell officially only takes one parameter.
 -}
 compareWithHundred :: (Num a, Ord a) => a -> Ordering
 compareWithHundred = compare 100
@@ -18,7 +21,7 @@ isUpperAlphanum :: Char -> Bool
 isUpperAlphanum = (`elem` ['A'..'Z'])  -- easier to use infix
 
 {-
-Higher-orderism
+# Higher-orderism
 -}
 applyTwice :: (a -> a) -> a -> a  -- right associative
 applyTwice f x = f (f x)
@@ -42,7 +45,7 @@ flip'' :: (a -> b -> c) -> b -> a -> c
 flip'' f = \x y -> f y x
 
 {-
-Maps and filters
+# Maps and Filters
 -}
 -- | implementation of "map"
 map' :: (a -> b) -> [a] -> [b]
@@ -85,7 +88,7 @@ numLongChains = length (filter isLong (map chain [1..100]))
 * \<params> -> <body>
 * anonymous functions used once
 * Lambdas are expressions that return a func
-* Normally surrounded by paranthesis
+* Normally surrounded by parenthesis
 -}
 numLongChains' :: Int
 numLongChains' = length (filter (\xs -> length xs > 15) (map chain [1..100]))
@@ -104,6 +107,9 @@ Reduce
 Implicit starting value
 * foldl1 <func> <list>
 * foldr1 <func> <list>
+
+Scan
+* scanl, scanr, scanl1, scanr2
 -}
 -- | usage of fold left, which starts from the left side.
 sumFold :: (Num a) => [a] -> a
@@ -129,3 +135,75 @@ headFold :: [a] -> a
 headFold = foldr1 (\x _ -> x)  -- from right, take the cur
 lastFold :: [a] -> a
 lastFold = foldl1 (\_ x -> x)  -- from left, take the cur
+
+reverseFold :: [a] -> [a]
+reverseFold = foldl (\acc x -> x : acc) []
+
+-- scanl & scanr will display the intermediate result
+-- thus more like dp
+-- | laregest until now
+maxDP = scanl1 (\acc x -> if x > acc then x else acc) [3,4,5,3,7,9,2,1]
+
+-- | number of elements to take for the sum of the roots of all natural numbers to exceed 1000
+sqrtSums :: Int
+sqrtSums = length (takeWhile (<1000) (scanl1 (+) (map sqrt [1..]))) + 1
+
+{-
+# Function Application $
+
+($) :: (a -> b) -> a -> b  -- infix
+f $ x = f x
+
+* Function application with a space is LEFT-associative (so f a b c is the same
+as ((f a) b) c)), function application with $ is RIGHT-associative.
+* $ has the lowest precedence
+* Usage: 1) get rid of parentheseses 2) apply function
+
+-}
+
+-- | get rid of parentheseses
+sumParenthesis = sum (map sqrt [1..130])
+sumFuncApply = sum $ map sqrt [1..130]
+
+-- | pass function application as func
+funcApply = map ($ 3) [(4+), (10*), (^2), sqrt]
+-- ($ 3) is different from (($) 3) for param position.
+
+{-
+# Function Composition
+
+(.) :: (b -> c) -> (a -> b) -> a -> c
+f . g = \x -> f (g x)
+
+* Function composition is right associative
+* Only composes funcs that takes one param, thus currying is needed for
+multi-param func
+
+-}
+
+-- | Replace lambda expressions
+allNegLambda = map (\x -> negate (abs x)) [5,-3,-6,7,-3,2,-19,24]
+allNegComp = map (negate . abs) [5,-3,-6,7,-3,2,-19,24]
+
+-- | Remove parentheseses
+funcParen = replicate 100 (product (map (*3) (zipWith max [1,2,3,4,5] [4,5,6,7,8])))
+funcComp = replicate 100 . product . map (*3) . zipWith max [1,2,3,4,5] $ [4,5,6,7,8]
+
+-- | Point free style (i.e. f(x) without param x)
+funcNormal x = ceiling (negate (tan (cos (max 50 x))))
+funcPointFree = ceiling . negate . tan . cos . max 50
+
+-- | Let binding vs. func composition
+oddSquareSum1 :: Integer
+oddSquareSum1 = sum (takeWhile (<10000) (filter odd (map (^2) [1..])))
+
+oddSquareSum2 :: Integer
+oddSquareSum2 = sum . takeWhile (<10000) . filter odd . map (^2) $ [1..]
+
+oddSquareSum3 :: Integer
+oddSquareSum3 =
+    let oddSquares = filter odd . map (^2) $ [1..]
+        belowLimit = takeWhile (<10000) oddSquares
+    in  sum belowLimit
+
+-- alternatively, oddSquares = filter odd $ map (^2) [1..]
