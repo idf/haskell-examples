@@ -1,5 +1,11 @@
+import Data.List
+import Data.Function
+import Data.Char
+import qualified Data.Map as Map
 {-
 # Modules
+
+Import must in the head. Unable to import in the middle
 ## import
 import Data.List Data.Set
 ## import
@@ -145,9 +151,6 @@ on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
 f `on` g = \x y -> f (g x) (g y)
 
 -}
-import Data.List
-import Data.Function
-
 search :: (Eq a) => [a] -> [a] -> Bool
 search needle haystack =
     let nlen = length needle
@@ -168,4 +171,54 @@ sortByLength :: [[a]] -> [[a]]
 sortByLength xs = sortBy (compare `on` length) xs
 
 {-
+# Data.Char
+## predicate :: Char -> Bool
+isControl, isSpace, isLower, isUpper, isAlpha, isUpper, isAlpha, isAlphaNum,
+isPrint, isDigit, isOctDigit, isHexDigit, isLetter, isMark, isNumber,
+isPunctuation, isSymbox, isSeparator, isAscii, isLatin1, isAsciiUpper,
+isAsciiLower
+
+## GeneralCategory
+> map generalCategory " \t\nA9?|"
+[Space,Control,Control,UppercaseLetter,DecimalNumber,OtherPunctuation,MathSymbol]
+
+## Converter
+* toUpper, toLower
+* toTitle: convert to title case
+* digitToInt, intToDigit: "int" <-> int, in Hex
+* ord, chr: char <-> int
+
 -}
+
+-- | predicate
+checkAlphaNum = all isAlphaNum "bobby283"
+
+-- | Caesar cipher, encode by shift
+encode :: Int -> String -> String
+encode offset msg = map (chr . (+ offset) . ord) msg
+
+-- | Caesar decipher
+decode :: Int -> String -> String
+decode offset msg = encode (negate offset) msg
+
+
+{-
+# Data.Map
+Internal implementation: tree
+
+* fromList
+Map.fromList :: (Ord k) => [(k, v)] -> Map.Map k v
+Ordable since using tree in Map.
+-}
+
+phoneBook =
+    [("betty","555-2938"),
+     ("bonnie","452-2928")
+    ]
+
+findKey :: (Eq k) => k -> [(k,v)] -> v
+findKey key xs = snd . head . filter (\(k,v) -> key == k) $ xs
+
+-- | safer
+findKey' :: (Eq k) => k -> [(k,v)] -> Maybe v
+findKey' key = foldr (\(k,v) acc -> if key == k then Just v else acc) Nothing

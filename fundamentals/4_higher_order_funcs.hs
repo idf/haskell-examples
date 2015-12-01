@@ -45,7 +45,7 @@ flip'' :: (a -> b -> c) -> b -> a -> c
 flip'' f = \x y -> f y x
 
 {-
-# Maps and Filters
+# Maps and Filters map filter
 -}
 -- | implementation of "map"
 map' :: (a -> b) -> [a] -> [b]
@@ -83,7 +83,7 @@ numLongChains = length (filter isLong (map chain [1..100]))
     where isLong xs = length xs > 15
 
 {-
-# Lambdas
+# Lambdas \
 
 * \<params> -> <body>
 * anonymous functions used once
@@ -97,7 +97,7 @@ numLongChains' = length (filter (\xs -> length xs > 15) (map chain [1..100]))
 sumPair = map (\(a,b) -> a + b) [(1,2),(3,5),(6,3),(2,6),(2,5)]
 
 {-
-# Folds
+# Folds foldl foldr
 
 Reduce
 * Fold from left: foldl <func <acc> <cur>> <acc> <list>, where func has left acc
@@ -170,7 +170,7 @@ funcApply = map ($ 3) [(4+), (10*), (^2), sqrt]
 -- ($ 3) is different from (($) 3) for param position.
 
 {-
-# Function Composition
+# Function Composition .
 
 (.) :: (b -> c) -> (a -> b) -> a -> c
 f . g = \x -> f (g x)
