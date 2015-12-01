@@ -5,6 +5,7 @@ In ghc interactive shell:
 * `:r` reload script
 * `:t <expr>` examine the type
 * `:info <type>` check the typeclass
+* `:m + Data.List Data.Map`, load modules to global bname space
 
 In ghci:
 
