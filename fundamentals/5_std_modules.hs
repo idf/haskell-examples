@@ -2,6 +2,7 @@ import Data.List
 import Data.Function
 import Data.Char
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 {-
 # Modules
 
@@ -209,6 +210,23 @@ Internal implementation: tree
 * fromList
 Map.fromList :: (Ord k) => [(k, v)] -> Map.Map k v
 Ordable since using tree in Map.
+
+* insert
+> Map.insert 5 600 . Map.insert 4 200 . Map.insert 3 100 $ Map.empty
+fromList [(3,100),(4,200),(5,600)]
+
+* null: check whether empty
+* size :: Map.Map k a -> Int
+* member :: Ord k => k -> Map.Map k a -> Bool
+* map, filter works on vals
+
+* toList
+* fromListWith: handle dup
+> Map.fromListWith max [(2,3),(2,5),(2,100),(3,29),(3,22),(3,11),(4,22),(4,15)]
+fromList [(2,100),(3,29),(4,22)]
+* insertWith: handle dup
+> Map.insertWith (+) 3 100 $ Map.fromList [(3,4),(5,103),(6,339)]
+fromList [(3,104),(5,103),(6,339)]
 -}
 
 phoneBook =
@@ -222,3 +240,37 @@ findKey key xs = snd . head . filter (\(k,v) -> key == k) $ xs
 -- | safer
 findKey' :: (Eq k) => k -> [(k,v)] -> Maybe v
 findKey' key = foldr (\(k,v) acc -> if key == k then Just v else acc) Nothing
+
+-- | implementation of 'fromList'
+fromList' :: Ord k => [(k,v)] -> Map.Map k v
+fromList' = foldr (\(k, v) acc -> Map.insert k v acc) Map.empty
+
+-- | use func to handle dup
+phoneBookToMap :: (Ord k) => [(k, String)] -> Map.Map k String
+phoneBookToMap xs = Map.fromListWith (\a b -> a ++ ", " ++ b) xs
+
+-- | Map.Map k [a]
+phoneBookToMap' :: (Ord k) => [(k, a)] -> Map.Map k [a]
+phoneBookToMap' xs = Map.fromListWith (++) $ map (\(k,v) -> (k,[v])) xs
+
+
+{-
+# Data.Set
+Internal implementation: tree, thus sorted
+
+* fromList
+Set.fromList :: Ord a => [a] -> Set.Set a
+
+* intersection
+* difference
+* union
+
+* null, size, member, empty, singleton, insert and delete
+* isSubsetOf, isProperSubsetOf
+
+* map, filter
+-}
+
+-- nub O(n^2), since only Eq not Ord is required in List
+-- | replace nub, faster, but order is not preserved
+setNub xs = Set.toList $ Set.fromList xs

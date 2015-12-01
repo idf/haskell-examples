@@ -100,8 +100,12 @@ sumPair = map (\(a,b) -> a + b) [(1,2),(3,5),(6,3),(2,6),(2,5)]
 # Folds foldl foldr
 
 Reduce
-* Fold from left: foldl <func <acc> <cur>> <acc> <list>, where func has left acc
-* Fold from right: foldr <func <cur> <acc>> <acc> <list>, where func has right acc
+* Fold from left:
+    foldl <func acc cur> <acc> <list>,
+  where func has left acc
+* Fold from right
+    foldr <func <cur> <acc>> <acc> <list>,
+  where func has right acc
 * Only foldr workds on infinite list
 
 Implicit starting value
