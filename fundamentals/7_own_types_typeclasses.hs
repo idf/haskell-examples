@@ -1,3 +1,4 @@
+import Data.List
 import qualified Data.Map as Map
 {-
 # Own types and typeclasses
@@ -190,5 +191,100 @@ lockers = Map.fromList
     ]
 
 {-
-Recursive Data Structures
+# Recursive Data Structures
+-}
+-- | Infix
+-- infixr <fixity> <special_chars>; fixitity is the precedence level
+
+-- | Implementation of "++"
+infixr 5  .++
+(.++) :: List a -> List a -> List a
+Empty .++ ys = ys
+(x :-: xs) .++ ys = x :-: (xs .++ ys)
+
+-- | List, an implementation of "[a]"
+data List' a = Empty' | Cons a (List' a) deriving (Show, Read, Eq, Ord)
+-- Cons is another word for "(:)"
+infixr 5 :-:
+data List a = Empty | a :-: (List a) deriving (Show, Read, Eq, Ord)
+
+-- | Tree
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
+
+-- | construct tree
+singleton :: a -> Tree a
+singleton x = Node x EmptyTree EmptyTree
+
+treeInsert :: (Ord a) => a -> Tree a -> Tree a
+treeInsert x EmptyTree = singleton x
+treeInsert x (Node a left right)
+    | x == a = Node x left right
+    | x < a  = Node a (treeInsert x left) right
+    | x > a  = Node a left (treeInsert x right)
+
+treeFromList xs = foldr treeInsert EmptyTree xs
+
+-- | search tree
+treeElem :: (Ord a) => a -> Tree a -> Bool
+treeElem x EmptyTree = False
+treeElem x (Node a left right)
+    | x == a = True
+    | x < a  = treeElem x left
+    | x > a  = treeElem x right
+
+
+{-
+# Own typeclasses
+* typeclasses are like interfaces
+* typeclass is not related class in OOP languages
+* types that can behave in that way are made instances of that typeclass
+* behavior of typeclasses is achieved by defining functions or just type declarations
+
+## constraints
+* class constraints in class declarations are used for making a typeclass a subclass of another typeclass.
+* class constraints in instance declarations are used to express require- ments about the contents of some type
+-}
+
+-- | implementation of "Eq" typeclass
+-- rename funcs, otherwise Ambiguous occurrence ‘==’
+class Eq' a where  -- a type variable, equiv equitable
+    (.==) :: a -> a -> Bool -- type declarations
+    (./=) :: a -> a -> Bool
+    x .== y = not (x ./= y)  -- mutual recursion, thus only need to define == later in instance
+    x ./= y = not (x .== y)
+
+-- | types instances of typeclasses
+data TrafficLight = Red | Yellow | Green
+
+
+-- | instanc of class
+-- minimal complete definition: ==
+instance Eq TrafficLight where
+    Red == Red       = True
+    Green == Green   = True
+    Yellow == Yellow = True
+    _ == _           = False  -- default, catch-all pattern
+
+
+-- | deriving (show) by hand
+instance Show TrafficLight where
+    show Red = "Red light"
+    show Yellow = "Yellow light"
+    show Green = "Green light"
+
+
+-- | subclasses typeclasses --> class constraints
+-- class (Eq a) => Num a where ...
+
+
+-- | type constructor as instance of typeclass
+-- unable to write "instance Eq Maybe where" since Maybe is not a type
+instance (Eq m) => Eq (Maybe' m) where
+    Just' x == Just' y   = x == y  -- (Eq m) typeclass constraint
+    Nothing' == Nothing' = True
+    _ == _               = False
+
+
+{-
+yes-no typeclass
 -}

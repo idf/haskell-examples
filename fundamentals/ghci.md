@@ -3,8 +3,8 @@ In ghc interactive shell:
 * `:quit`
 * `:l <script.hs>`
 * `:r` reload script
-* `:t <expr>` examine the type
-* `:info <type>` check the typeclass
+* `:t <type>` examine the type
+* `:info <typeclass>` check the typeclass
 * `:m + Data.List Data.Map`, load modules to global bname space
 
 In ghci:
