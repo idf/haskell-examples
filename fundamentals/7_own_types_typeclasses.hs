@@ -1,3 +1,4 @@
+import qualified Data.Map as Map
 {-
 # Own types and typeclasses
 -}
@@ -106,6 +107,9 @@ tellCar' (Car' {company' = c, model' = m, year' = y}) = "This " ++ c ++ " " ++ m
 e.g. the Int type is an instance of the Eq typeclass.
 deriving (<typeclass>)
 
+Type vs. Typeclass
+If treat "type" as value, "typeclass" becomes type function, takes type value and returns a new type; type constructor.
+
 Ord
 * First comes in value constructor is smaller
 * If equal, nested compare
@@ -138,4 +142,53 @@ entireDays = [minBound .. maxBound] :: [Day]
 
 {-
 # Type synonyms
+
+Different name binding:
+type String = [Char]
+
+Type constructors vs. Value constructors
+unable to do: TypeConstructor [(1,2),(4,5),(7,9)]
+able to do: [(1,2),(3,5),(8,9)] :: TypeConstructor Int Int
+-}
+
+type PhoneBook = [(String,String)]
+
+-- | Type constructor, parameterized type synonyms
+type AssocList k v = [(k,v)]
+
+-- | Type constructor currying, since type constructor is a func
+type IntMap v = Map.Map Int v
+type IntMap' = Map.Map Int
+
+-- | Implementation of "Either", value constructor
+-- errors use the Left value constructor while results use Right
+data Either' a b = Left' a | Right' b deriving (Eq, Ord, Read, Show)
+
+
+-- | locker example
+data LockerState = Taken | Free deriving (Show, Eq) -- not Enum, but like enumerate
+type Code = String
+type LockerMap = Map.Map Int (LockerState, Code)
+
+lockerLookup :: Int -> LockerMap -> Either String Code  -- returns Either
+lockerLookup lockerNumber map =
+    case Map.lookup lockerNumber map of  -- Map.lookup returns Maybe
+         Nothing -> Left $ "Locker number " ++ show lockerNumber ++ " doesn't exist!"
+         Just (state, code) -> if state /= Taken then
+                                   Right code
+                               else
+                                   Left $ "Locker " ++ show lockerNumber ++ " is already taken!"
+
+lockers :: LockerMap
+lockers = Map.fromList
+    [(100,(Taken,"ZD39I"))
+    ,(101,(Free,"JAH3I"))
+    ,(103,(Free,"IQSA9"))
+    ,(105,(Free,"QOTSA"))
+    ,(109,(Taken,"893JJ"))
+    ,(110,(Taken,"99292"))
+    ]
+
+{-
+Recursive Data Structures
 -}
