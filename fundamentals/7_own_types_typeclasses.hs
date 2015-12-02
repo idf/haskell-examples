@@ -54,19 +54,88 @@ data Person = Person { firstName :: String
 
 -- | dict constructor
 data Car = Car {company :: String, model :: String, year :: Int} deriving (Show)
-aCar = Car {company="Ford", model="Mustang", year=1967}
+
+aCar = Car "Ford" "Mustang" 1967
+aCarDict = Car {company="Ford", model="Mustang", year=1967}
+
+showCar :: Car -> String
+showCar (Car {company = c, model = m, year = y}) = "This " ++ c ++ " " ++ m ++ " was made in " ++ show y
 
 {-
 # Type parameters
-
+## Type constructor
 Value constructor -> type constructor
-e.g. "a" as the type parameter
+data <Type> <param> = ... e.g. "a" as the type parameter. Similar to Java
+generics
 * Maybe a
 * [a]
 
+A list of stuff is a list of stuff and it doesn't matter what the type of that
+stuff is, it can still work.
+
+Polymorphic type: Nothing is polymorphic type
+
+## Typeclass constraints in data
+Strong convention in Haskell to never add typeclass constraints in data
+declarations, since have to put them into the function type declarations
+either way.
 -}
 
 -- | Implementation of "Maybe"
--- a is a type parameter, thus Maybe' generates a type
+-- a is a type parameter, thus Maybe' generates a type, e.g. Maybe Int
 -- No value can have a type of Maybe, because that's not a type per se, it's a type constructor.
-data Maybe' a = Nothing | Just a
+data Maybe' a = Nothing' | Just' a
+-- | Just Int, the Int type is inferred
+aMaybe = Just 0
+
+-- | Car String String int, although no practical usage.
+data Car' a b c = Car' { company' :: a
+                       , model' :: b
+                       , year' :: c
+                       } deriving (Show)
+
+aCar' = Car' "Ford" "Mustang" 1967
+
+tellCar' :: (Show a) => Car' String String a -> String
+tellCar' (Car' {company' = c, model' = m, year' = y}) = "This " ++ c ++ " " ++ m ++ " was made in " ++ show y
+
+{-
+# Derived Instance
+## Typeclass
+"typeclass" is like a interface, "type" implemnts the interface.
+e.g. the Int type is an instance of the Eq typeclass.
+deriving (<typeclass>)
+
+Ord
+* First comes in value constructor is smaller
+* If equal, nested compare
+
+Enum
+* successor, predecessor: succ, pred
+
+Bounded
+* head smallest, tail largest;
+* minBound, maxBound
+-}
+
+data Person' = Person' { firstName' :: String
+                       , lastName' :: String
+                       , age' :: Int
+                       } deriving (Eq, Show, Read)
+
+deserializePerson = read "Person' {firstName' =\"Michael\", lastName' =\"Diamond\", age' = 43}" :: Person'
+
+-- | nullary constructor
+data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
+         deriving (Eq, Ord, Show, Read, Bounded, Enum)
+
+-- | ellipsis
+partialDays = [Thursday .. Sunday]
+
+-- | range
+entireDays = [minBound .. maxBound] :: [Day]
+
+
+{-
+# Type synonyms
+-}
