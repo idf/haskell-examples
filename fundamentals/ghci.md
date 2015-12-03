@@ -1,3 +1,5 @@
+Everything in Haskell is a **function**.
+
 In ghc interactive shell:
 
 * `:quit`
@@ -6,6 +8,7 @@ In ghc interactive shell:
 * `:t <type>` examine the type
 * `:info <typeclass>` check the typeclass
 * `:m + Data.List Data.Map`, load modules to global bname space
+* `:k <type>`, show the kind of a type
 
 In ghci:
 

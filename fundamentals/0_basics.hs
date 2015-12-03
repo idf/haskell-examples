@@ -3,6 +3,7 @@
 
 * Singleton list: [1] allowed
 * The syntax comes from the math set comprehension.
+* Compared to dynamic array in Python, List in haskell is LinkedList
 -}
 -- | List Comprehension example with predicate
 listComprehension = [ 2*x | x <- [50..100], x `mod` 2 == 1]

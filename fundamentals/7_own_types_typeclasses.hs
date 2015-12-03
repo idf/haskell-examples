@@ -274,8 +274,8 @@ instance Show TrafficLight where
 
 
 -- | subclasses typeclasses --> class constraints
--- class (Eq a) => Num a where ...
-
+class (Eq a) => Num' a where
+    dummy :: a
 
 -- | type constructor as instance of typeclass
 -- unable to write "instance Eq Maybe where" since Maybe is not a type
@@ -286,5 +286,96 @@ instance (Eq m) => Eq (Maybe' m) where
 
 
 {-
-yes-no typeclass
+# yes-no typeclass
+Example
 -}
+class YesNo a where
+    yesno :: a -> Bool
+
+instance YesNo Int where
+    yesno 0 = False
+    yesno _ = True
+
+instance YesNo [a] where
+    yesno [] = False
+    yesno _ = True
+
+instance YesNo Bool where
+    yesno = id  -- identify func, (\a -> a)
+
+instance YesNo (Maybe a) where
+    yesno (Just _) = True
+    yesno Nothing = False
+
+yesnoIf :: (YesNo yn) => yn -> a -> a -> a
+yesnoIf yesnoVal yesResult noResult = if yesno yesnoVal then yesResult else noResult
+
+
+{-
+# Functor typeclass
+* In mathematics, a functor is a type of mapping between categories which is applied in category theory.
+* Functor takes type constructor
+* Types that can act like a BOX can be functors:
+instance Functor [] where
+    fmap = map
+
+instance Functor Maybe where
+    fmap f (Just x) = Just (f x)
+    fmap f Nothing = Nothing
+
+instance (Ord k) => Functor (Map.Map k) where
+    fmap = M.map
+-}
+
+-- | implementation of "Functor"
+class Functor' f where  -- f is a type constructor
+     fmap' :: (a -> b) -> f a -> f b
+
+instance Functor Tree where
+    fmap f EmptyTree = EmptyTree
+    fmap f (Node x leftsub rightsub) = Node (f x)
+                                       (fmap f leftsub)
+                                       (fmap f rightsub)
+
+-- | "Either" a is a functor in the standard libraries
+-- Curried type constructorsince since Functor takes 1-param type constructor
+-- Only maps Right b, leaving Left a untouched
+-- Impractical to map both Left a and Right b otherwise Left Right should be the same type
+instance Functor (Either' a) where
+    fmap f (Right' x) = Right' (f x)
+    fmap f (Left' x) = Left' x
+
+
+{-
+# Kind
+Type is the type of value
+Kind is the type of type
+
+> :k Interactive
+Int :: *  -- star kind, a concrete type
+
+> :k Maybe
+Maybe :: * -> * -- take a concrete type and returns a concrete type
+
+> :k Either
+Either :: * -> * -> *
+
+> :k Either String
+Either String :: * -> * -- type constructor curried
+-}
+
+-- j is * -> *; t is * -> (* -> *) -> *
+class Tofu t where
+    tofu :: j a -> t a j
+
+-- Frank is * -> (* -> *) -> *
+data Frank a b  = Frank {frankField :: b a} deriving (Show)
+
+instance Tofu Frank where
+    tofu x = Frank x
+
+-- Barry is (* -> *) -> * -> * -> *
+data Barry t k p = Barry { yabba :: p, dabba :: t k }
+
+instance Functor (Barry t k) where
+     fmap f (Barry {yabba = pval, dabba = tkval}) = Barry {yabba = f pval, dabba = tkval}
