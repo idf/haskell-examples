@@ -8,12 +8,12 @@ import qualified Data.Map as Map
 # Algebraic data types
 -}
 
--- | Value constructors are actually functions that ultimately return a value of a data type.
--- Shape is a type, Circle isn't.
+-- | Value constructors: functions that ultimately return a value of a data type.
+-- Shape is a type, Circle isn't. Circle is value constructor for type
 data Shape1 = Circle1 Float Float Float | Rectangle1 Float Float Float Float
-           deriving (Show) -- show
+              deriving (Show)
 
--- | Pattern matching for constructors
+-- | Pattern matching for value constructors
 surface1 :: Shape1 -> Float
 surface1 (Circle1 _ _ r) = pi * r ^ 2
 surface1 (Rectangle1 x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
@@ -21,28 +21,30 @@ surface1 (Rectangle1 x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
 -- | Currying for value constructors
 circles1 = map (Circle1 10 20) [4,5,6,6]
 
--- | used the same name for the data type and the value constructor, if only one constructor
+-- | Conventionally, use the same name for the data type and the value constructor, if only one constructor
 data Point = Point Float Float deriving (Show)
 data Shape = Circle Point Float | Rectangle Point Point deriving (Show)
 
--- | nested pattern matching
+-- | Nested pattern matching for value constructor
 surface :: Shape -> Float
 surface (Circle _ r) = pi * r ^ 2
 surface (Rectangle (Point x1 y1) (Point x2 y2)) = (abs $ x2 - x1) * (abs $ y2 - y1)
 
 {-
 To export all the value constructors for a given type, just write ..
+```
 module Shapes
 ( Point(..)
 , Shape(..)
 ) where
+```
 
 If opt not to export any value constructors for Shape by just writing Shape in the export statement.
 That way, someone importing our module could only make shapes by using the auxilliary functions.
 -}
 
 {-
-# Record Syntax
+# Record Syntax for value constructor
 
 creates functions that lookup fields in the data type.
 -}
@@ -54,9 +56,9 @@ data Person = Person { firstName :: String
                      , flavor :: String
                      } deriving (Show)
 
--- | dict constructor
+-- | Dict value constructor
 data Car = Car {company :: String, model :: String, year :: Int} deriving (Show)
-
+-- Use of value constructor
 aCar = Car "Ford" "Mustang" 1967
 aCarDict = Car {company="Ford", model="Mustang", year=1967}
 
@@ -66,40 +68,46 @@ showCar (Car {company = c, model = m, year = y}) = "This " ++ c ++ " " ++ m ++ "
 {-
 # Type parameters
 ## Type constructor
-Value constructor -> type constructor
-data <Type> <param> = ... e.g. "a" as the type parameter. Similar to Java
-generics
+* From value constructor to type constructor
+* Data is a type constructor
+```
+data <Type> <param> = <dataConstructor>
+```
+
+e.g. "a" as the type parameter. Similar to Java generics
 * Maybe a
 * [a]
 
 A list of stuff is a list of stuff and it doesn't matter what the type of that
 stuff is, it can still work.
 
-Polymorphic type: Nothing is polymorphic type
+Polymorphic type: "Nothing" is polymorphic type
 
 ## Typeclass constraints in data
 Strong convention in Haskell to never add typeclass constraints in data
 declarations, since have to put them into the function type declarations
-either way.
+anyway.
 -}
 
 -- | Implementation of "Maybe"
--- a is a type parameter, thus Maybe' generates a type, e.g. Maybe Int
+-- "a" is a type parameter, thus Maybe' generates a type, e.g. Maybe Int
 -- No value can have a type of Maybe, because that's not a type per se, it's a type constructor.
+-- Nonthing, Just are data constructor
 data Maybe' a = Nothing' | Just' a
 -- | Just Int, the Int type is inferred
+-- | Just is-a type constructor, Just Int is-a type, Just 0 is-a value
 aMaybe = Just 0
 
 -- | Car String String int, although no practical usage.
-data Car' a b c = Car' { company' :: a
+data Car' a b c = CarConstruct' { company' :: a
                        , model' :: b
                        , year' :: c
                        } deriving (Show)
 
-aCar' = Car' "Ford" "Mustang" 1967
+aCar' = CarConstruct' "Ford" "Mustang" 1967
 
 tellCar' :: (Show a) => Car' String String a -> String
-tellCar' (Car' {company' = c, model' = m, year' = y}) = "This " ++ c ++ " " ++ m ++ " was made in " ++ show y
+tellCar' (CarConstruct' {company' = c, model' = m, year' = y}) = "This " ++ c ++ " " ++ m ++ " was made in " ++ show y
 
 {-
 # Derived Instance
@@ -132,12 +140,12 @@ deserializePerson = read "Person' {firstName' =\"Michael\", lastName' =\"Diamond
 
 -- | nullary constructor
 data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
-         deriving (Eq, Ord, Show, Read, Bounded, Enum)
+           deriving (Eq, Ord, Show, Read, Bounded, Enum)
 
--- | ellipsis
+-- | ellipsis since Enum
 partialDays = [Thursday .. Sunday]
 
--- | range
+-- | range since Bounded
 entireDays = [minBound .. maxBound] :: [Day]
 
 
@@ -147,8 +155,8 @@ entireDays = [minBound .. maxBound] :: [Day]
 Different name binding:
 type String = [Char]
 
-Type constructors vs. Value constructors
-unable to do: TypeConstructor [(1,2),(4,5),(7,9)]
+Type constructors vs. Value constructors/ Data constructor
+unable to do: TypeConstructor [(1,2),(4,5),(7,9)], since type constructor only takes type params
 able to do: [(1,2),(3,5),(8,9)] :: TypeConstructor Int Int
 -}
 
@@ -205,6 +213,7 @@ Empty .++ ys = ys
 -- | List, an implementation of "[a]"
 data List' a = Empty' | Cons a (List' a) deriving (Show, Read, Eq, Ord)
 -- Cons is another word for "(:)"
+
 infixr 5 :-:
 data List a = Empty | a :-: (List a) deriving (Show, Read, Eq, Ord)
 
@@ -257,7 +266,7 @@ class Eq' a where  -- a type variable, equiv equitable
 data TrafficLight = Red | Yellow | Green
 
 
--- | instanc of class
+-- | instanc of (type) class
 -- minimal complete definition: ==
 instance Eq TrafficLight where
     Red == Red       = True
@@ -266,16 +275,17 @@ instance Eq TrafficLight where
     _ == _           = False  -- default, catch-all pattern
 
 
--- | deriving (show) by hand
+-- | deriving (Show) by hand, thus can customize show func
 instance Show TrafficLight where
     show Red = "Red light"
     show Yellow = "Yellow light"
     show Green = "Green light"
 
 
--- | subclasses typeclasses --> class constraints
+-- | "subclasses typeclasses" is equiv to "class constraints"
 class (Eq a) => Num' a where
     dummy :: a
+
 
 -- | type constructor as instance of typeclass
 -- unable to write "instance Eq Maybe where" since Maybe is not a type
@@ -296,7 +306,7 @@ instance YesNo Int where
     yesno 0 = False
     yesno _ = True
 
-instance YesNo [a] where
+instance YesNo [a] where -- [] is type constructor, [a] is a type
     yesno [] = False
     yesno _ = True
 
@@ -314,8 +324,9 @@ yesnoIf yesnoVal yesResult noResult = if yesno yesnoVal then yesResult else noRe
 {-
 # Functor typeclass
 * In mathematics, a functor is a type of mapping between categories which is applied in category theory.
-* Functor takes type constructor
+* Functor is a typeclass, which takes a type constructor as param
 * Types that can act like a BOX can be functors:
+```
 instance Functor [] where
     fmap = map
 
@@ -325,6 +336,7 @@ instance Functor Maybe where
 
 instance (Ord k) => Functor (Map.Map k) where
     fmap = M.map
+```
 -}
 
 -- | implementation of "Functor"
