@@ -1,5 +1,7 @@
 Everything in Haskell is a **function**.
 
+# Interactive
+
 In ghc interactive shell:
 
 * `:quit`
@@ -13,3 +15,10 @@ In ghc interactive shell:
 In ghci:
 
 * To define a function, must use `let` in the head
+
+
+# Compile
+```bash
+ghc --make helloworld
+./helloworld
+```
