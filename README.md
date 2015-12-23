@@ -1,2 +1,2 @@
-# commons-util-haskell
-Common Util Functions for Haskell
+# haskell-examples
+Common examples for haskell
