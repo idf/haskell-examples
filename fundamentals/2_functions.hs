@@ -3,8 +3,8 @@ Functions
 -}
 
 {-
-Pattern Matching
-Pattern matching are not just for functions
+# Pattern Matching
+Pattern matching are not just for function params, but also in DRAW FROM `<-`; `case`
 -}
 -- | factorial, recursive + pattern matching
 factorial :: (Integral a) => a -> a
@@ -24,14 +24,16 @@ head' (x:_) = x
 length' :: (Num b) => [a] -> b
 length' [] = 0
 length' (_:xs) = 1 + length' xs
+
 sum' :: (Num a) => [a] -> a
 sum' [] = 0
 sum' (x:xs) = x + sum' xs
 
--- | pattern: xs@(x0:x1:x2s), syntatic sugar
+-- | @ pattern: xs@(x0:x1:x2s), syntatic sugar
 
 {-
-Guards
+# Guards `|`
+it is not `case`
 -}
 a `cmp` b
     | a > b = GT
@@ -39,7 +41,7 @@ a `cmp` b
     | otherwise = LT
 
 {-
-Where
+# WHERE statement
 -}
 -- | "where" for shorthand local variable notations
 initials :: String -> String -> String
@@ -48,14 +50,15 @@ initials firstname lastname = [f] ++ ". " ++ [l] ++ "."
           (l:_) = lastname
 
 -- | "where" for shorthand local func notations, like mapper
+-- following math convvetion
 calcBmis :: (RealFloat a) => [(a, a)] -> [a]
 calcBmis xs = [bmi w h | (w, h) <- xs]
     where bmi weight height = weight/height^2
 
 {-
-Let
+# Let
 -}
--- | let <bindings> in <expression>
+-- | leet .. in ..: let <bindings> in <expression>
 letVar = let a = 100; b = 200; c = 300 in a*b*c
 letFunc = [let square x = x * x in (square 2, square 3, square 5)]
 -- | let for list comprehension
@@ -64,7 +67,7 @@ calcBmis' xs = [bmi w h | (w, h) <- xs, let bmi w h = w / h ^ 2]
 calcBmis'' xs = [bmi | (w, h) <- xs, let bmi = w / h ^ 2, bmi >= 25.0] -- without params
 
 {-
-Case
+# Case
 case <expr> of <pat> -> <ret>
                <pat> -> <ret>
 

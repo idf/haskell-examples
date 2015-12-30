@@ -1,9 +1,10 @@
 {-
 Recursion
 
-no while loops or for loops in Haskell
+no "while" loops or "for" loops in Haskell
 -}
 -- | "maximum"
+-- `a` is a type param
 maxLst :: (Ord a) => [a] -> a
 maxLst [] = error "empty list"
 maxLst [x] = x
@@ -16,7 +17,8 @@ maxLst' [] = error "empty"
 maxLst' [x] = x
 maxLst' (x:xs) = max x (maxLst' xs)
 
--- | implementation of "take"
+-- | implementation of "take", [:n]
+-- `,` is like and
 take' :: (Num i, Ord i) => i -> [a] -> [a]
 take' n _
     | n<=0 =[]
@@ -53,3 +55,4 @@ quicksort (x:xs) =
     let left = quicksort [a | a <- xs, a <= x]
         right = quicksort [a | a <- xs, a > x]
     in  left ++ [x] ++ right
+-- can be rewritten using `where`

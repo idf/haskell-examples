@@ -1,13 +1,13 @@
 {-
 Types and typeclasses
 
-Haskell is statically typed
-Type inference
-cont type: capitalized
-type variable: lowercase
-typeclass: like interface in OOP
+Haskell is statically typed with type inference
 
-Typeclasses:
+const type: capitalized
+type variable: lowercase
+typeclass: like interface in OOP; type constructor function taking params
+
+TYPECLASSES:
 * Eq
 * Ord
 * Show
@@ -20,7 +20,7 @@ Polymorphic const: type coercion
 Polymorphic funct: generic func
 -}
 
--- | indifference in param types and return type
+-- | indifference in param types and return type in func type declarations
 addThree :: Int -> Int -> Int -> Int
 addThree x y z = x + y + z
 
@@ -29,13 +29,14 @@ factorial n = product [1..n]
 
 {-
 type class "Eq", "Ord"
-"=>" for class contraint
+"=>" for CLASS CONSTRAINT
 Special-character func "==" is infix func, "(==)" make it a normal prefix func
 -}
 equal' :: (Eq a) => a -> a -> Bool
 equal' x y = (==) x y
 
 -- | read :: (Read a) => String -> a
+-- like eval
 readLst = read "[1,2,3,4]" ++ [3]
 
 -- | read with type annotation to resolve ambiguity when w/o context

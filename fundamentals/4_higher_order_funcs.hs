@@ -1,5 +1,5 @@
 {-
-# Higher order functions
+Higher order functions
 
 Functions that takes func params or return func
 -}
@@ -12,35 +12,38 @@ Every function in Haskell officially only takes one parameter.
 compareWithHundred :: (Num a, Ord a) => a -> Ordering
 compareWithHundred = compare 100
 
--- | to curry infix func: 1. parethesize. 2. supply one parameter
+-- | to curry infix func: 1. parethesize and 2. supply RIGHT parameter
 divideByTen :: (Floating a) => a -> a
-divideByTen = (/10)
+divideByTen = (/10)  -- INFIX
 
 -- | check upper case
 isUpperAlphanum :: Char -> Bool
 isUpperAlphanum = (`elem` ['A'..'Z'])  -- easier to use infix
+-- `op` makes prefix operator become infix
 
 {-
 # Higher-orderism
 -}
 applyTwice :: (a -> a) -> a -> a  -- right associative
 applyTwice f x = f (f x)
+applyTwice' f x = f $ f x
 
--- | implementation of "zipWith"
+-- | implementation of "zipWith" func
 zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
 zipWith' _ [] _ = []
 zipWith' _ _ [] = []
 zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
 -- zipWith' (zipWith' (*)) [[1,2,3],[3,5,6],[2,3,4]] [[3,2,2],[3,4,5],[5,4,3]]
 
--- | flip param, implementation of "flip"
--- flip is frequently used with currying to swap the right next func's params
--- e.g. zipWith (flip' div) [2,2..] [10,8,6,4,2]
+-- | flip param, implementation of "flip", FILP PARAMS
+-- flip is frequently used with currying to swap the right next func's left & right params
+-- e.g. zipWith (flip div) [2,2..] [10,8,6,4,2]
 -- (a -> b -> c) -> b -> a -> c is same as (a -> b -> c) -> (b -> a -> c) due to right associative
 flip' :: (a -> b -> c) -> b -> a -> c
 flip' f y x = f x y
 
 -- | alternatively use lambda, equivalent
+-- f is a func taking two params, then flip f = a lambda func
 flip'' :: (a -> b -> c) -> b -> a -> c
 flip'' f = \x y -> f y x
 
@@ -72,6 +75,7 @@ quicksort (x:xs) =
 sumOddSquares = sum (takeWhile (<10000) (filter odd (map (^2) [1..])))  -- brackets for currying
 
 -- | Collatz sequences
+-- Half Or Triple Plus One
 chain :: (Integral a) => a -> [a]
 chain 1 = [1]
 chain n
