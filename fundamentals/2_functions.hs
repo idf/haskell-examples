@@ -4,7 +4,7 @@ Functions
 
 {-
 # Pattern Matching
-Pattern matching are not just for function params, but also in DRAW FROM `<-`; `case`
+Pattern matching are not just for function params, but also in DataList; `case`; value constructor;
 -}
 -- | factorial, recursive + pattern matching
 factorial :: (Integral a) => a -> a

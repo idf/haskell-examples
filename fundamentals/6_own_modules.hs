@@ -3,8 +3,9 @@
 a module exports functions.
 
 ## Single file
+```
 import Geometry
-
+```
 ## Hierarchical structs
 .
 ├── Geometry
@@ -13,6 +14,7 @@ import Geometry
 │   └── Sphere.hs
 -}
 
+-- declare module and public functions
 module Geometry
 (sphereVolume
 ,sphereArea

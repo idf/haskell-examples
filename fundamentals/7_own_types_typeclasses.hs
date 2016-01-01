@@ -1,7 +1,7 @@
 import Data.List
 import qualified Data.Map as Map
 {-
-# Own types and typeclasses
+Own types and typeclasses
 -}
 
 {-
@@ -9,7 +9,7 @@ import qualified Data.Map as Map
 -}
 
 -- | Value constructors: functions that ultimately return a value of a data type.
--- Shape is a type, Circle isn't. Circle is value constructor for type
+-- Shape is a TYPE, Circle isn't. Circle is VALUE CONSTRUCTOR for type
 data Shape1 = Circle1 Float Float Float | Rectangle1 Float Float Float Float
               deriving (Show)
 
@@ -21,7 +21,7 @@ surface1 (Rectangle1 x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
 -- | Currying for value constructors
 circles1 = map (Circle1 10 20) [4,5,6,6]
 
--- | Conventionally, use the same name for the data type and the value constructor, if only one constructor
+-- | Conventionally, use the SAME name for the data type and the value constructor, if only one constructor
 data Point = Point Float Float deriving (Show)
 data Shape = Circle Point Float | Rectangle Point Point deriving (Show)
 
@@ -39,14 +39,14 @@ module Shapes
 ) where
 ```
 
-If opt not to export any value constructors for Shape by just writing Shape in the export statement.
+If opt not to export any value constructors for Shape, just writing Shape type in the export statement.
 That way, someone importing our module could only make shapes by using the auxilliary functions.
 -}
 
 {-
 # Record Syntax for value constructor
 
-creates functions that lookup fields in the data type.
+RECORD SYNTAX creates functions that lookup fields in the data type.
 -}
 data Person = Person { firstName :: String
                      , lastName :: String
@@ -68,10 +68,16 @@ showCar (Car {company = c, model = m, year = y}) = "This " ++ c ++ " " ++ m ++ "
 {-
 # Type parameters
 ## Type constructor
-* From value constructor to type constructor
-* Data is a type constructor
+* From value constructor to TYPE CONSTRUCTOR
+* DATA is a type constructor
 ```
-data <Type> <param> = <dataConstructor>
+data <type> <type_param> = <dataConstructor>
+```
+, where type_param is type parameter and dataConstructor takes a <value>, see `Maybe a` as an example
+
+compared to typelass, which is like interfaces:
+```
+class <typeclass> <type>
 ```
 
 e.g. "a" as the type parameter. Similar to Java generics
@@ -93,16 +99,18 @@ anyway.
 -- "a" is a type parameter, thus Maybe' generates a type, e.g. Maybe Int
 -- No value can have a type of Maybe, because that's not a type per se, it's a type constructor.
 -- Nonthing, Just are data constructor
-data Maybe' a = Nothing' | Just' a
--- | Just Int, the Int type is inferred
--- | Just is-a type constructor, Just Int is-a type, Just 0 is-a value
+data Maybe' a = Nothing | Just a
+
+-- | Maybe Num, the Num type is inferred
+-- | Just is-a type/data constructor, Maybe Num is-a type, Just 0 is-a value
+aMaybe :: Num a => Maybe a
 aMaybe = Just 0
 
--- | Car String String int, although no practical usage.
+-- | Car String String int, with variable types, although no practical usage.
 data Car' a b c = CarConstruct' { company' :: a
-                       , model' :: b
-                       , year' :: c
-                       } deriving (Show)
+                                , model' :: b
+                                , year' :: c
+                                } deriving (Show)
 
 aCar' = CarConstruct' "Ford" "Mustang" 1967
 
@@ -111,14 +119,15 @@ tellCar' (CarConstruct' {company' = c, model' = m, year' = y}) = "This " ++ c ++
 
 {-
 # Derived Instance
-## Typeclass
-"typeclass" is like a interface, "type" implemnts the interface.
+## Deriving typeclass
+"typeclass" is like a INTERFACE, "type" implemnts the interface.
 e.g. the Int type is an instance of the Eq typeclass.
 deriving (<typeclass>)
 
 Type vs. Typeclass
 If treat "type" as value, "typeclass" becomes type function, takes type value and returns a new type; type constructor.
 
+## Common typeclasses
 Ord
 * First comes in value constructor is smaller
 * If equal, nested compare
@@ -155,9 +164,9 @@ entireDays = [minBound .. maxBound] :: [Day]
 Different name binding:
 type String = [Char]
 
-Type constructors vs. Value constructors/ Data constructor
-unable to do: TypeConstructor [(1,2),(4,5),(7,9)], since type constructor only takes type params
-able to do: [(1,2),(3,5),(8,9)] :: TypeConstructor Int Int
+Type constructors vs. Value/Data constructors
+Unable to do: TypeConstructor [(1,2),(4,5),(7,9)], since type constructor only takes type params
+Able to do: [(1,2),(3,5),(8,9)] :: TypeConstructor Int Int
 -}
 
 type PhoneBook = [(String,String)]
@@ -200,6 +209,7 @@ lockers = Map.fromList
 
 {-
 # Recursive Data Structures
+Recursive type
 -}
 -- | Infix
 -- infixr <fixity> <special_chars>; fixitity is the precedence level
@@ -246,18 +256,18 @@ treeElem x (Node a left right)
 # Own typeclasses
 * typeclasses are like interfaces
 * typeclass is not related class in OOP languages
-* types that can behave in that way are made instances of that typeclass
+* types that can behave in that way are made instances of that typeclass, IMPLEMENTS
 * behavior of typeclasses is achieved by defining functions or just type declarations
 
 ## constraints
-* class constraints in class declarations are used for making a typeclass a subclass of another typeclass.
-* class constraints in instance declarations are used to express require- ments about the contents of some type
+* class constraints in CLASS declarations are used for making a typeclass a subclass of another typeclass.
+* class constraints in INSTANCE declarations are used to express requirements about the contents of some type
 -}
 
 -- | implementation of "Eq" typeclass
 -- rename funcs, otherwise Ambiguous occurrence ‘==’
 class Eq' a where  -- a type variable, equiv equitable
-    (.==) :: a -> a -> Bool -- type declarations
+    (.==) :: a -> a -> Bool  -- type declarations
     (./=) :: a -> a -> Bool
     x .== y = not (x ./= y)  -- mutual recursion, thus only need to define == later in instance
     x ./= y = not (x .== y)
@@ -308,7 +318,7 @@ instance YesNo Int where
 
 instance YesNo [a] where -- [] is type constructor, [a] is a type
     yesno [] = False
-    yesno _ = True
+    yesno _  = True
 
 instance YesNo Bool where
     yesno = id  -- identify func, (\a -> a)

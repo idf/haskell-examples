@@ -13,7 +13,7 @@ import Data.List Data.Set
 import Data.List (nub, sort)
 ## import except
 import Data.List hiding (nub)
-## qualified import, call func with fully-qualified name
+## QUALIFIED import, call func with fully-qualified name
 import qualified Data.Map
 import qualified Data.Map as M
 
@@ -45,6 +45,8 @@ https://www.haskell.org/hoogle/
 * and: all true
 > and $ map (>4) [5,6,7,8]
 True
+> and . map (>4) $ [5,6,7,8]
+True
 
 * or: any false
 
@@ -58,7 +60,7 @@ True
 > take 10 $ iterate (*2) 1
 [1,2,4,8,16,32,64,128,256,512]
 
-* splitAt: split a list at index
+* splitAt: split a list at index, (A[:i], A[:i])
 > splitAt 5 "helloworld"
 ("hello","world")
 
@@ -151,6 +153,11 @@ group is groupBy (==)
 on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
 f `on` g = \x y -> f (g x) (g y)
 
+## Examples of
+* take
+* groupBy
+* on
+* sortBy
 -}
 search :: (Eq a) => [a] -> [a] -> Bool
 search needle haystack =
@@ -158,13 +165,13 @@ search needle haystack =
     in  foldl (\acc x -> if take nlen x == needle then True else acc) False (tails haystack)
 
 -- | group by signs
-groupBySample :: [[Double]]
-groupBySample = let values = [-4.3, -2.4, -1.2, 0.4, 2.3, 5.9, 10.5, 29.1]
+groupBySign :: [[Double]]
+groupBySign = let values = [-4.3, -2.4, -1.2, 0.4, 2.3, 5.9, 10.5, 29.1]
                 in groupBy (\x y -> (x > 0) == (y > 0)) values
 
 -- | doing (==) `on` (> 0)
-groupBySample' :: [[Double]]
-groupBySample' = let values = [-4.3, -2.4, -1.2, 0.4, 2.3, 5.9, 10.5, 29.1]
+groupBySign' :: [[Double]]
+groupBySign' = let values = [-4.3, -2.4, -1.2, 0.4, 2.3, 5.9, 10.5, 29.1]
                  in groupBy ((==) `on` (>0)) values
 
 -- | compare using key
@@ -189,6 +196,7 @@ isAsciiLower
 * digitToInt, intToDigit: "int" <-> int, in Hex
 * ord, chr: char <-> int
 
+## Examples
 -}
 
 -- | predicate
@@ -207,6 +215,7 @@ decode offset msg = encode (negate offset) msg
 # Data.Map
 Internal implementation: tree
 
+## Common functions
 * fromList
 Map.fromList :: (Ord k) => [(k, v)] -> Map.Map k v
 Ordable since using tree in Map.
@@ -227,6 +236,8 @@ fromList [(2,100),(3,29),(4,22)]
 * insertWith: handle dup
 > Map.insertWith (+) 3 100 $ Map.fromList [(3,4),(5,103),(6,339)]
 fromList [(3,104),(5,103),(6,339)]
+
+## Examples
 -}
 
 phoneBook =
@@ -234,10 +245,11 @@ phoneBook =
      ("bonnie","452-2928")
     ]
 
+-- snd: second component of the pair
 findKey :: (Eq k) => k -> [(k,v)] -> v
 findKey key xs = snd . head . filter (\(k,v) -> key == k) $ xs
 
--- | safer
+-- | safer than above using Maybe typeclass
 findKey' :: (Eq k) => k -> [(k,v)] -> Maybe v
 findKey' key = foldr (\(k,v) acc -> if key == k then Just v else acc) Nothing
 
@@ -258,6 +270,7 @@ phoneBookToMap' xs = Map.fromListWith (++) $ map (\(k,v) -> (k,[v])) xs
 # Data.Set
 Internal implementation: tree, thus sorted
 
+## Common functions
 * fromList
 Set.fromList :: Ord a => [a] -> Set.Set a
 
@@ -269,8 +282,16 @@ Set.fromList :: Ord a => [a] -> Set.Set a
 * isSubsetOf, isProperSubsetOf
 
 * map, filter
+
+## Examples
 -}
 
--- nub O(n^2), since only Eq not Ord is required in List
+{-
+## nub
+nub :: Eq a => [a] -> [a]
+nub O(n^2), since only Eq not Ord is required in List.
+Deduplicate. The nub function removes duplicate elements from a list. In particular,
+it keeps only the first occurrence of each element.
+-}
 -- | replace nub, faster, but order is not preserved
 setNub xs = Set.toList $ Set.fromList xs
