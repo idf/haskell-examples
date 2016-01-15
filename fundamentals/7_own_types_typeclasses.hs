@@ -46,7 +46,8 @@ That way, someone importing our module could only make shapes by using the auxil
 {-
 # Record Syntax for value constructor
 
-RECORD SYNTAX creates functions that lookup fields in the data type.
+RECORD syntax creates functions (RECORDs) that lookup fields in the data type.
+You can "get" and "set" attributes in RECORD.
 -}
 data Person = Person { firstName :: String
                      , lastName :: String
