@@ -27,3 +27,48 @@ main1 = do  -- do block, impure/tainted environment.
     name <- getLine  -- bound getLine return to name
     putStrLn ("Hey " ++ name ++ ", you rock!")
     -- In a do block, the last action cannot be bound to a name. More on monads
+
+
+{-
+`return` makes an I/O action out of a pure value. 
+-}
+main2 = do
+    line <- getLine
+    if null line
+        then return ()  -- nothing like imperative programming
+        else do
+            putStrLn $ reverseWords line
+            main2
+
+reverseWords :: String -> String
+reverseWords = unwords . map reverse . words
+
+
+main3 = do
+    a <- return "hell"
+    b <- return "yeah!"
+    putStrLn $ a ++ " " ++ b
+
+
+{-
+# Files and streams
+-}
+
+
+{-
+# Command line arguments
+-}
+
+
+{-
+# Randomness
+-}
+
+{-
+# Bytestrings
+-}
+
+{-
+# Exceptions
+-}
+

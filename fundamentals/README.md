@@ -21,6 +21,9 @@ In ghci:
 ```bash
 ghc --make helloworld
 ./helloworld
+
+# or
+runhaskell helloworld.hs
 ```
 
 # `.` and `$`
@@ -29,6 +32,9 @@ ghc --make helloworld
 ```hs
 Prelude> :t (.)
 (.) :: (b -> c) -> (a -> b) -> a -> c
+
+reverseWords :: String -> String
+reverseWords = unwords . map reverse . words
 ```
 
 Note also the `f.g.h x` is not equivalent to `(f.g.h) x`, because it is interpreted as `f.g.(h x)` which won't typecheck unless `(h x)` returns a function.
@@ -39,4 +45,19 @@ This is where the `$` operator can come in handy: `f.g.h $ x` turns `x` from bei
 Prelude> :t ($)
 ($) :: (a -> b) -> a -> b
 ```
+
+# Typeclass
+Typeclass (`class`) is like interface in OOP. Type (`data` for new / `type` for synonym) can behave in that way are made instances (`deriving` / `instance`) of that typeclass.
+
+```hs
+-- | implementation of "Eq" typeclass
+-- rename funcs, otherwise Ambiguous occurrence ‘==’
+class Eq' a where  -- a type variable, equiv equitable
+    (.==) :: a -> a -> Bool  -- type declarations
+    (./=) :: a -> a -> Bool
+    x .== y = not (x ./= y)  -- mutual recursion, thus only need to define == later in instance
+    x ./= y = not (x .== y)
+```
+
+# Functor
 
