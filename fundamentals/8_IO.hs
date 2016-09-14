@@ -22,8 +22,8 @@ The entire type of getLine is :: IO String
 We can only take the IO return result (<-) when we're in IO action;
 thus Haskell manages to neatly separate the pure and impure parts of our code.
 -}
-main1 = do  -- do block
+main1 = do  -- do block, impure/tainted environment. 
     putStrLn "Hello, what's your name?"
-    name <- getLine
+    name <- getLine  -- bound getLine return to name
     putStrLn ("Hey " ++ name ++ ", you rock!")
     -- In a do block, the last action cannot be bound to a name. More on monads
