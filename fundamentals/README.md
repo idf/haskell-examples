@@ -59,5 +59,12 @@ class Eq' a where  -- a type variable, equiv equitable
     x ./= y = not (x .== y)
 ```
 
+Type constructor is like Java generics, taking type parameters to produce a concrete type. 
+
 # Functor
+Functors are things that can be **mapped** over, like lists.
+```hs
+class Functor f where
+    fmap :: (a -> b) -> f a -> f b
+```
 
