@@ -52,6 +52,8 @@ Functor Law 1: fmap id = id.
 Functor Law 2: fmap (f . g) = fmap f . fmap g 
 -}
 
+
+
 {-
 # Applicative functors
 
@@ -114,3 +116,102 @@ pure (+) x = (+)  -- inbox and then unbox
 -}
 func :: (Num a) => a -> a
 func = (+) <$> (+3) <*> (*100)
+
+
+{-
+With ordinary functors, we can just map functions over one functor. 
+But with applicative functors, we can apply a function between several functors
+-}
+liftA  :: Applicative t => (a -> b) -> t a -> t b
+
+liftA2 :: Applicative t => (a1 -> a2 -> b) -> t a1 -> t a2 -> t b
+liftA2 f a1 a2 = f <$> a1 <*> a2
+
+liftA3 :: Applicative t 
+       => (a1 -> a2 -> a3 -> b) 
+       -> t a1 
+       -> t a2
+       -> t a3
+       -> t b
+
+
+{-
+> map (\f -> f 7) [(>4),(<10),odd]
+[True,True,True]
+> and $ map (\f -> f 7) [(>4),(<10),odd]
+True
+
+> sequenceA [Just 3, Just 2, Just 1]
+Just [3,2,1]
+
+> sequenceA [(>4),(<10),odd] 7
+[True,True,True]
+-}
+sequenceA :: (Applicative f) => [f a] -> f [a]
+sequenceA [] = pure []
+sequenceA (x:xs) = (:) <$> x <*> sequenceA xs
+
+{-
+Applicative Functor Laws:
+f <*> x = fmap f x
+pure id <*> v = v
+pure (.) <*> u <*> v <*> w= u <*> ( v <*> w)
+pure f <*> pure x = pure (f x)
+u <*> pure y = pure ($ y) <*> u
+-} 
+
+
+
+{-
+# The newtype keyword
+
+data: to make our own algebraic data types.
+type: to give existing types synonyms.
+newtype: to make new types wrapping existing data types. 
+-}
+
+{-
+take one type and wrap it in something to present it as another type.
+-}
+newtype ZipList a = ZipList { getZipList :: [a] }
+
+{-
+Using newtype to make type class instance
+-}
+newtype Pair a b = Pair { getPair :: (a,b) }
+
+
+-- Functor requires its instances to be type constructors which take one parameter.
+instance Functor (Pair c) where
+    -- fmap :: (a -> b) -> Pair c a -> Pair c b
+    fmap f (Pair (x,y)) = Pair (f x, y)
+
+{-
+On newtype laziness
+newtype types can only have one possible value constructor and one field
+-}
+
+
+
+{-
+# Monoids
+-}
+class Monoid m where
+    mempty :: m  -- identity value
+    mappend :: m -> m -> m  -- binary func
+    mconcat :: [m] -> m  -- reduce
+    mconcat = foldr mappend mempty
+
+
+{-
+Monoid laws:
+mempty `mappend` x = x
+x `mappend` mempty = x
+(x `mappend` y) `mappend` z = x `mappend` (y `mappend` z)
+-}
+
+
+-- Lists are Monoid
+instance Monoid [a] where
+    mempty = []
+    mappend = (++)
