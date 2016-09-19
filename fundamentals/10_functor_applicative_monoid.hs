@@ -9,18 +9,15 @@ Functors, Applicative Functors and Monoids
 class Functor' f where
     fmap :: (a -> b) -> f a -> f b
 
-{-
-IO is a functor
--}
+-- IO is a functor
 instance Functor IO where
     fmap f action = do
         result <- action
         return (f result)
 
-{-
-Function is a functor.
-fmap over two functions is just composition
--}
+-- Function is a functor.
+
+-- fmap over two functions is just composition
 instance Functor ((->) r) where
     fmap f g = (\x -> f . g $ x)
 
@@ -81,16 +78,12 @@ same as: pure f <*> x <*> y <*> z
 (<$>) :: (Functor f) => (a -> b) -> f a -> f b
 func <$> x = fmap func x  -- infix alias for fmap, fmap for function is composition
 
-{-
-List is ap functor
--}
+-- List is ap functor
 instance Applicative [] where
     pure x = [x]
     fs <*> xs = [f x | f <- fs, x <- xs]
 
-{-
-IO is ap functor
--}
+-- IO is ap functor
 instance Applicative IO where
     pure = return
     a <*> b = do
@@ -170,14 +163,11 @@ type: to give existing types synonyms.
 newtype: to make new types wrapping existing data types. 
 -}
 
-{-
-take one type and wrap it in something to present it as another type.
--}
+
+-- take one type and wrap it in something to present it as another type.
 newtype ZipList a = ZipList { getZipList :: [a] }
 
-{-
-Using newtype to make type class instance
--}
+-- Using newtype to make type class instance
 newtype Pair a b = Pair { getPair :: (a,b) }
 
 
@@ -195,6 +185,8 @@ newtype types can only have one possible value constructor and one field
 
 {-
 # Monoids
+
+a monoid is an algebraic structure with a single associative binary operation and an identity element.
 -}
 class Monoid m where
     mempty :: m  -- identity value
@@ -215,3 +207,100 @@ x `mappend` mempty = x
 instance Monoid [a] where
     mempty = []
     mappend = (++)
+
+
+-- Both product and sum can make Numbers monoids
+newtype Product a =  Product { getProduct :: a }
+    deriving (Eq, Ord, Read, Show, Bounded)
+
+instance Num a => Monoid (Product a) where
+    mempty = Product 1
+    Product x `mappend` Product y = Product (x * y)
+
+
+-- Any & All
+newtype Any = Any { getAny :: Bool }
+    deriving (Eq, Ord, Read, Show, Bounded)
+
+instance Monoid Any where
+    mempty = Any False
+    Any x `mappend` Any y = Any (x || y)
+
+newtype All = All { getAll :: Bool }
+    deriving (Eq, Ord, Read, Show, Bounded)
+
+-- Ordering monoid
+instance Monoid Ordering where
+    mempty = EQ
+    LT `mappend` _ = LT -- lt then lt
+    EQ `mappend` y = y  -- eq then next
+    GT `mappend` _ = GT -- gt then gt
+
+lengthCompare :: String -> String -> Ordering
+lengthCompare x y = let a = length x `compare` length y
+                        b = x `compare` y
+                    in if a==EQ then b else a
+
+
+lengthCompare' :: String -> String -> Ordering
+lengthCompare' x y = (length x `compare` length y) `mappend`
+                     (x `compare` y)
+
+
+-- Maybe the monoid
+instance Monoid a => Monoid (Maybe a) where
+    mempty = Nothing
+    Nothing `mappend` m = m
+    m `mappend` Nothing = m
+    Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)  -- class constraint Monoid a
+
+-- keep the first content, if a is not monoid
+newtype First a = First { getFirst :: Maybe a }
+    deriving (Eq, Ord, Read, Show)
+
+
+instance Monoid (First a) where
+    mempty = First Nothing
+    First (Just x) `mappend` _ = First (Just x)
+    First Nothing `mappend` x = x
+
+{-
+Using monoids to fold data structures
+-}
+import qualified Foldable as F
+
+{-
+> :t foldr
+foldr :: (a -> b -> b) -> b -> [a] -> b
+
+> :t F.foldr
+F.foldr :: (F.Foldable t) => (a -> b -> b) -> b -> t a -> b
+-}
+
+ex1 = F.foldr (*) 1 [1,2,3]  -- 6
+
+ex2 = F.foldl (+) 2 (Just 9) -- 11
+
+-- make a type foldable, by implementing foldmap
+
+data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
+
+
+instance F.Foldable Tree where
+    -- foldMap :: (Monoid m, Foldable t) => (a -> m) -> t a -> m
+    -- a: content; t a: foldable structure
+    foldMap f Empty = mempty
+    foldMap f (Node x l r) = F.foldMap f l `mappend`
+                             f x           `mappend`
+                             F.foldMap f r
+
+{-
+> F.foldl (*) 1 testTree
+64800
+
+> getAny $ F.foldMap (\x -> Any $ x == 3) testTree
+True
+
+> F.foldMap (\x -> [x]) testTree
+[1,3,6,5,8,9,10]
+-}
