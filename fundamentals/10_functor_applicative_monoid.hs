@@ -58,7 +58,7 @@ mapping "multi-parameter" functions over functors, we get functors that contain 
 f (a -> b)
 
 how fmap is defined for applicatives:
-fmap l x = pure l <*> x
+fmap l x = pure l <*> x = l <$> x
 
 -}
 af = fmap (*) [1,2,3,4]
