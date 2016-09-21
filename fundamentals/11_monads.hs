@@ -123,9 +123,90 @@ justH = do
 
 {-
 # List monad
+
+non-deterministic values
+-}
+instance Monad [] where
+    return x = [x]
+    xs >>= f = concat (map f xs)  -- flatten
+    fail _ = []
+
+{-
+> [1,2] >>= \n -> ['a','b'] >>= \ch -> return (n,ch)
+[(1,'a'),(1,'b'),(2,'a'),(2,'b')]
+
+> [ (n,ch) | n <- [1,2], ch <- ['a','b'] ]
+[(1,'a'),(1,'b'),(2,'a'),(2,'b')]
+
+list comprehensions are just syntactic sugar for using lists as monads. In the end, 
+list comprehensions and lists in do notation translate to using >>= to do computations 
+that feature non-determinism.
+-}
+listOfTuples :: [(Int,Char)]
+listOfTuples = do
+    n <- [1,2]
+    ch <- ['a','b']
+    return (n,ch)
+
+{-
+MonadPlus type class is for monads that can also act as monoids
 -}
 
+class Monad m => MonadPlus m where
+    mzero :: m a
+    mplus :: m a -> m a -> m a
+
+
+instance MonadPlus [] where
+    mzero = []
+    mplus = (++)
+
+{-
+> [1..50] >>= (\x -> guard ('7' `elem` show x) >> return x)
+[7,17,27,37,47]
+-}
+guard :: (MonadPlus m) => Bool -> m ()
+guard True = return ()
+guard False = mzero
 
 {-
 # Monad law
+
+Left identity
+Right identity
+Associativity
 -}
+
+{-
+Left identity
+
+return x >>= f \equiv f x
+-}
+
+li1 = return 3 >>= (\x -> Just (x+100000))
+li2 = (\x -> Just (x+100000)) 3
+
+{-
+Right identity
+
+m >>= return \equiv m
+-}
+
+ri = Just "move on up" >>= (\x -> return x)
+
+{-
+Associativity
+
+(m >>= f) >>= g \equiv m >>= (\x -> f x >>= g)
+-}
+
+assoc1 = return (0,0) >>= landRight 2 >>= landLeft 2 >>= landRight 2
+assoc2 = return (0,0) >>= (\x ->
+    landRight 2 x >>= (\y ->
+    landLeft 2 y >>= (\z ->
+    landRight 2 z)))
+
+-- function composition at monad level
+(<=<) :: (Monad m) => (b -> m c) -> (a -> m b) -> (a -> m c)
+f <=< g = (\x -> g x >>= f)
+
