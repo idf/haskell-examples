@@ -126,6 +126,12 @@ pop = State $ \(x:xs) -> (x,xs)
 push :: Int -> State Stack ()
 push a = State $ \xs -> ((),a:xs)
 
+{-
+> runState stackStuff [9,0,2,1,0]
+((),[8,3,0,2,1,0])
+
+Need an initial feed
+-}
 stackStuff :: State Stack ()
 stackStuff = do
     a <- pop
@@ -146,6 +152,8 @@ threeCoins is now a stateful computations and after taking an initial random gen
 it to the  first randomSt, which produces a number and a new generator, which gets passed to the next one and so on. 
 
 do notation: auto feed to the next line.
+
+Need an initial feed
 -}
 threeCoins :: State StdGen (Bool,Bool,Bool)
 threeCoins = do
@@ -155,3 +163,50 @@ threeCoins = do
     return (a,b,c)
 
 r = runState threeCoins (mkStdGen 33)  --  ((True,False,True),680029187 2103410263)
+
+{-
+# Error
+
+Either e a  -- e for error
+-}
+instance (Error e) => Monad (Either e) where
+    return x = Right x
+    Right x >>= f = f x
+    Left err >>= f = Left err
+    fail msg = Left (strMsg msg)
+
+{-
+> Right 3 >>= \x -> return (x + 100) :: Either String Int
+Right 103
+-}
+
+
+
+{-
+# Monadic functions
+
+Every monad is an applicative functor and every applicative functor is a functor.
+-}
+
+-- liftM and fmap do the similar thing
+liftM :: (Monad m) => (a -> b) -> m a -> m b
+liftM f m = m >>= (\x -> return (f x))
+
+fmap :: (Functor f) => (a -> b) -> f a -> f b
+(<*>) :: (Applicative f) => f (a -> b) -> f a -> f b
+
+-- ap function is basically <*>, only it has a Monad constraint instead of an Applicative one.
+ap :: (Monad m) => m (a -> b) -> m a -> m b
+ap mf m = do
+    f <- mf
+    x <- m
+    return (f x)
+
+-- join, flatten the nested monads
+join :: (Monad m) => m (m a) -> m a
+
+-- filter
+filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
+
+-- fold
+foldM :: (Monad m) => (a -> b -> m a) -> a -> [b] -> m a
