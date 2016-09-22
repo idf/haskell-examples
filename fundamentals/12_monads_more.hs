@@ -107,3 +107,51 @@ addStuff' x = let
 {-
 # State
 -}
+
+-- take a state, and return a result and a new state.
+-- s -> (a, s) is a function for stateful computation
+newtype State s a = State { runState :: s -> (a,s) }
+
+instance Monad (State s) where
+    return x = State $ \s -> (x,s)
+    -- (>>=) :: State s a -> (a -> State s b) -> State s b
+    (State h) >>= f = State $ \s -> let (a, newState) = h s
+                                        (State g) = f a
+                                    in  g newState
+
+-- stack
+pop :: State Stack Int
+pop = State $ \(x:xs) -> (x,xs)
+
+push :: Int -> State Stack ()
+push a = State $ \xs -> ((),a:xs)
+
+stackStuff :: State Stack ()
+stackStuff = do
+    a <- pop
+    if a == 5
+        then push 5
+        else do 
+            push 3
+            push 8
+
+-- random
+import System.Random
+randomSt :: (RandomGen g, Random a) => State g a
+randomSt = State random
+
+
+{-
+threeCoins is now a stateful computations and after taking an initial random generator, it passes 
+it to the  first randomSt, which produces a number and a new generator, which gets passed to the next one and so on. 
+
+do notation: auto feed to the next line.
+-}
+threeCoins :: State StdGen (Bool,Bool,Bool)
+threeCoins = do
+    a <- randomSt
+    b <- randomSt
+    c <- randomSt
+    return (a,b,c)
+
+r = runState threeCoins (mkStdGen 33)  --  ((True,False,True),680029187 2103410263)
