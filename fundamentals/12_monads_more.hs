@@ -202,11 +202,129 @@ ap mf m = do
     x <- m
     return (f x)
 
--- join, flatten the nested monads
+{-
+join, flatten the nested monads
+m >>= f \equiv join (fmap f m)
+-}
 join :: (Monad m) => m (m a) -> m a
 
 -- filter
 filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
 
+
+{-
+> powerset [1,2,3]
+[[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]
+
+powerset using non-determinism
+-}
+powerset :: [a] -> [[a]]
+powerset xs = filterM (\x -> [True, False]) xs
+
 -- fold
 foldM :: (Monad m) => (a -> b -> m a) -> a -> [b] -> m a
+
+{-
+ghci> foldM binSmalls 0 [2,8,3,1]
+Just 14
+ghci> foldM binSmalls 0 [2,11,3,1]
+Nothing
+-}
+sumSmalls :: Int -> Int -> Maybe Int
+sumSmalls acc x
+    | x > 9 = Nothing
+    | otherwise = Just (acc + x)
+
+
+-- RPN
+readMaybe :: (Read a) => String -> Maybe a
+readMaybe st = case reads st of [(x,"")] -> Just x
+                                _ -> Nothing
+
+foldingFunction :: [Double] -> String -> Maybe [Double]
+foldingFunction (x:y:ys) "*" = return ((x * y):ys)
+foldingFunction (x:y:ys) "+" = return ((x + y):ys)
+foldingFunction (x:y:ys) "-" = return ((y - x):ys)
+foldingFunction xs numberString = liftM (:xs) (readMaybe numberString)
+
+solveRPN :: String -> Maybe Double
+solveRPN st = do
+    [result] <- foldM foldingFunction [] (words st)
+    return result
+
+
+{-
+Composing monadic functions
+
+<=< function is just like composition
+-}
+in3 :: KnightPos -> [KnightPos]
+in3 start = return start >>= moveKnight >>= moveKnight >>= moveKnight
+
+canReachIn3 :: KnightPos -> KnightPos -> Bool
+canReachIn3 start end = end `elem` in3 start
+
+
+-- replicate, then fold to compose
+inMany :: Int -> KnightPos -> [KnightPos]
+inMany x start = return start >>= foldr (<=<) return (replicate x moveKnight)
+
+canReachIn :: Int -> KnightPos -> KnightPos -> Bool
+canReachIn x start end = end `elem` inMany x start
+
+
+
+{-
+# Making monads
+
+how a type gets made, identi ed as a monad and then given the appropriate Monad instance. 
+-}
+
+-- Fraction to model probability
+import Data.Ratio
+
+newtype Prob a = Prob { getProb :: [(a, Rational)] } deriving Show
+
+instance Functor Prob where
+    fmap f (Prob xs) = Prob $ map (\(x,p) -> (f x,p)) xs
+
+thisSituation :: Prob (Prob Char)
+thisSituation = Prob
+    [( Prob [('a',1%2),('b',1%2)] , 1%4 )
+    ,( Prob [('c',1%2),('d',1%2)] , 3%4)
+    ]
+
+-- flatten nested Prob, like join
+flatten :: Prob (Prob a) -> Prob a
+flatten (Prob xs) = Prob $ concat $ map multAll xs
+    where multAll (Prob innerxs,p) = map (\(x,r) -> (x,p*r)) innerxs
+
+instance Monad Prob where
+    return x = Prob [(x,1%1)]
+    m >>= f = flatten (fmap f m)
+    fail _ = Prob []
+
+-- coins
+data Coin = Heads | Tails deriving (Show, Eq)
+coin :: Prob Coin
+coin = Prob [(Heads,1%2),(Tails,1%2)]
+
+loadedCoin :: Prob Coin
+loadedCoin = Prob [(Heads,1%10),(Tails,9%10)]
+
+import Data.List (all)
+
+flipThree :: Prob Bool
+flipThree = do
+    a <- coin
+    b <- coin
+    c <- loadedCoin
+    return (all (==Tails) [a,b,c])
+
+{-
+> getProb flipThree
+[(False,1 % 40),(False,9 % 40),(False,1 % 40),(False,9 % 40),
+ (False,1 % 40),(False,9 % 40),(False,1 % 40),(True,9 % 40)]
+
+2^3 = 8
+-}
