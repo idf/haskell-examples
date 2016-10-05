@@ -12,7 +12,26 @@ putStrLn :: String -> IO ()
 IO side-effect action, with () as dummy return type
 The empty tuple is a value of () and it also has a type of ().
 -}
+
+-- | `main` function will be executed if loaded
+
+main0 :: IO ()
 main0 = putStrLn "hello, world"
+
+
+-- execute this will error: no show
+act1 :: [IO ()]
+act1 = [
+  putStrLn "1",
+  putStrLn "2"
+  ]
+
+-- need to use `do`
+crunch :: [IO ()] -> IO ()
+crunch [] = return;
+crunch (x:xs) = do
+  x
+  crunch xs
 
 {-
 getLine :: IO String
@@ -22,7 +41,7 @@ The entire type of getLine is :: IO String
 We can only take the IO return result (<-) when we're in IO action;
 thus Haskell manages to neatly separate the pure and impure parts of our code.
 -}
-main1 = do  -- do block, impure/tainted environment. 
+main1 = do  -- do block, impure/tainted environment.
     putStrLn "Hello, what's your name?"
     name <- getLine  -- bound getLine return to name
     putStrLn ("Hey " ++ name ++ ", you rock!")
@@ -30,7 +49,7 @@ main1 = do  -- do block, impure/tainted environment.
 
 
 {-
-`return` makes an I/O action out of a pure value. 
+`return` makes an I/O action out of a pure value.
 -}
 main2 = do
     line <- getLine
@@ -71,4 +90,3 @@ main3 = do
 {-
 # Exceptions
 -}
-

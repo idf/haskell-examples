@@ -77,3 +77,9 @@ case <expr> of <pat> -> <ret>
 head'' :: [a] -> a
 head'' xs = case xs of [] -> error "empty"
                        (x:_) -> x
+
+
+range :: Int -> Int -> [Int]
+range i j
+  | i < j = i : range (i+1) j
+  | otherwise = []

@@ -10,15 +10,16 @@ Own types and typeclasses
 
 -- | Value constructors: functions that ultimately return a value of a data type.
 -- Shape is a TYPE, Circle isn't. Circle is VALUE CONSTRUCTOR for type
+-- Type and the Constructor may have the same name or different names
 data Shape1 = Circle1 Float Float Float | Rectangle1 Float Float Float Float
-              deriving (Show)
+              deriving (Show)  -- multi-constructor
 
 -- | Pattern matching for value constructors
 surface1 :: Shape1 -> Float
 surface1 (Circle1 _ _ r) = pi * r ^ 2
 surface1 (Rectangle1 x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
 
--- | Currying for value constructors
+-- | Currying for value constructors, since constructor is a func
 circles1 = map (Circle1 10 20) [4,5,6,6]
 
 -- | Conventionally, use the SAME name for the data type and the value constructor, if only one constructor
@@ -30,8 +31,9 @@ surface :: Shape -> Float
 surface (Circle _ r) = pi * r ^ 2
 surface (Rectangle (Point x1 y1) (Point x2 y2)) = (abs $ x2 - x1) * (abs $ y2 - y1)
 
+
 {-
-To export all the value constructors for a given type, just write ..
+To EXPORT all the value constructors for a given type, just write ..
 ```
 module Shapes
 ( Point(..)
@@ -43,11 +45,15 @@ If opt not to export any value constructors for Shape, just writing Shape type i
 That way, someone importing our module could only make shapes by using the auxilliary functions.
 -}
 
+
+
 {-
 # Record Syntax for value constructor
 
 RECORD syntax creates functions (RECORDs) that lookup fields in the data type.
 You can "get" and "set" attributes in RECORD.
+
+namedtuple
 -}
 data Person = Person { firstName :: String
                      , lastName :: String
@@ -70,16 +76,17 @@ showCar (Car {company = c, model = m, year = y}) = "This " ++ c ++ " " ++ m ++ "
 # Type parameters
 ## Type constructor
 * From value constructor to TYPE CONSTRUCTOR
-* DATA is a type constructor
+* DATA is a type constructor [GENERICS]
 ```
 data <type> <type_param> = <dataConstructor>
 ```
-, where type_param is type parameter and dataConstructor takes a <value>, see `Maybe a` as an example
+, where type_param is type parameter and dataConstructor takes a <value>, e.g. `Maybe a`.
 
-compared to typelass, which is like interfaces:
+compared to typelass [INTERFACE], which is like interfaces:
 ```
 class <typeclass> <type>
 ```
+Let <type> implement the requried methods in <typeclass>.
 
 e.g. "a" as the type parameter. Similar to Java generics
 * Maybe a
@@ -91,7 +98,7 @@ stuff is, it can still work.
 Polymorphic type: "Nothing" is polymorphic type
 
 ## Typeclass constraints in data
-Strong convention in Haskell to never add typeclass constraints in data
+Strong convention in Haskell to never add typeclass (class) constraints in type (data)
 declarations, since have to put them into the function type declarations
 anyway.
 -}
@@ -102,7 +109,7 @@ anyway.
 -- Nonthing, Just are data constructor
 data Maybe' a = Nothing | Just a
 
--- | Maybe Num, the Num type is inferred
+-- | Maybe Num, the Num type is inferred (type inferrence)
 -- | Just is-a type/data constructor, Maybe Num is-a type, Just 0 is-a value
 aMaybe :: Num a => Maybe a
 aMaybe = Just 0
@@ -141,18 +148,31 @@ Bounded
 * minBound, maxBound
 -}
 
+-- RECORD syntax
 data Person' = Person' { firstName' :: String
                        , lastName' :: String
                        , age' :: Int
                        } deriving (Eq, Show, Read)
 
+-- specify the expect type (:: Person') when multiple possible results
 deserializePerson = read "Person' {firstName' =\"Michael\", lastName' =\"Diamond\", age' = 43}" :: Person'
+
+data Circle = Ci { ciX :: Double
+                 , ciY :: Double
+                 , ciR :: Double  -- ciR :: Circle -> Double
+                 } deriving(Show)
+
+c0 = Circle {ciX = 0, ciY = 0, ciR =1}
+
+areaCircle :: Circle -> Double
+areaCircle c = pi * r * r
+  where r = ciR c  -- record selector
 
 -- | nullary constructor
 data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
            deriving (Eq, Ord, Show, Read, Bounded, Enum)
 
--- | ellipsis since Enum
+-- | ellipsis since Enum, .. will call succ for the Enum, Ord
 partialDays = [Thursday .. Sunday]
 
 -- | range since Bounded
@@ -162,6 +182,7 @@ entireDays = [minBound .. maxBound] :: [Day]
 {-
 # Type synonyms
 
+SYN
 Different name binding:
 type String = [Char]
 
@@ -172,7 +193,7 @@ Able to do: [(1,2),(3,5),(8,9)] :: TypeConstructor Int Int
 
 type PhoneBook = [(String,String)]
 
--- | Type constructor, parameterized type synonyms
+-- | Type constructor, parameterized type synonyms, more like GENERICS
 type AssocList k v = [(k,v)]
 
 -- | Type constructor currying, since type constructor is a func
@@ -180,7 +201,8 @@ type IntMap v = Map.Map Int v
 type IntMap' = Map.Map Int
 
 -- | Implementation of "Either", value constructor
--- errors use the Left value constructor while results use Right
+
+-- errors use the Left value constructor while results use Right, GENERICS
 data Either' a b = Left' a | Right' b deriving (Eq, Ord, Read, Show)
 
 

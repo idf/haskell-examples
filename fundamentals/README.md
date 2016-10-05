@@ -5,8 +5,8 @@ Everything in Haskell is a **function**.
 In ghc interactive shell:
 
 * `:quit`
-* `:l <script.hs>`
-* `:r` reload script
+* `:l <script.hs>`, load
+* `:r` reload scrip
 * `:t <type>` examine the type
 * `:info <typeclass>` check the typeclass
 * `:m + Data.List Data.Map`, load modules to global bname space
@@ -14,10 +14,12 @@ In ghc interactive shell:
 
 In ghci:
 
-* To define a function, must use `let` in the head
+* To define a function, must use `let` in the when do declarations.
+```hs
+let pat x y z = x * (y + z)
+```
 
-
-# To compile
+# Comilaton `ghc`
 ```bash
 ghc --make helloworld
 ./helloworld
@@ -25,6 +27,9 @@ ghc --make helloworld
 # or
 runhaskell helloworld.hs
 ```
+
+# Hoogle
+Use the type info of a customized function to search on Hoogle to check whether there are existing built-ins.
 
 # `.` and `$`
 `.` is a higher order function for function composition.
@@ -59,7 +64,7 @@ class Eq' a where  -- a type variable, equiv equitable
     x ./= y = not (x .== y)
 ```
 
-Type constructor is like Java generics, taking type parameters to produce a concrete type. 
+Type constructor is like Java generics, taking type parameters to produce a concrete type.
 
 # Functor
 Functors are things that can be **mapped** over, like lists.
@@ -67,4 +72,3 @@ Functors are things that can be **mapped** over, like lists.
 class Functor f where
     fmap :: (a -> b) -> f a -> f b
 ```
-
